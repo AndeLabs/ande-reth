@@ -9,11 +9,11 @@ RUN apt-get update && \
     build-essential \
     pkg-config \
     libssl-dev \
-    clang-14 \
-    libclang-14-dev \
-    llvm-14-dev \
+    clang \
+    libclang-dev \
+    llvm-dev \
     libc6-dev \
-    && ln -sf /usr/lib/llvm-14/lib/libclang.so /usr/lib/libclang.so
+    && rm -rf /var/lib/apt/lists/*
 
 FROM chef AS planner
 COPY . .
@@ -52,10 +52,10 @@ RUN cargo build --profile $BUILD_PROFILE --bin ev-reth --manifest-path bin/ev-re
 RUN ls -la /app/target/$BUILD_PROFILE/ev-reth
 RUN cp /app/target/$BUILD_PROFILE/ev-reth /ev-reth
 
-FROM ubuntu:22.04 AS runtime
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS runtime
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates curl jq libssl-dev pkg-config strace && \
+    apt-get install -y --no-install-recommends ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
