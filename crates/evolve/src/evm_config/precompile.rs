@@ -8,10 +8,8 @@
 //!
 //! **Address:** 0x00000000000000000000000000000000000000fd
 
-use reth_primitives::{
-    revm_primitives::{Bytes, Precompile, PrecompileError, PrecompileResult, PrecompileWithAddress},
-    Address, U256,
-};
+use alloy_primitives::{Address, U256};
+use reth_revm::primitives::{Bytes, Precompile, PrecompileError, PrecompileResult, PrecompileWithAddress};
 use std::fmt;
 
 /// ANDE Token Duality Precompile Address: 0x00..fd

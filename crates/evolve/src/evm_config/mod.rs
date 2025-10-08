@@ -7,14 +7,13 @@
 use reth_chainspec::ChainSpec;
 use reth_evm::{ConfigureEvm, ConfigureEvmEnv};
 use reth_evm_ethereum::EthEvmConfig;
-use reth_primitives::{
-    revm_primitives::{
-        AnalysisKind, CfgEnvWithHandlerCfg, Env, HandlerCfg, PrecompileSpecId, TxEnv,
-    },
-    Address, Header, TransactionSigned, U256,
-};
+use reth_ethereum_primitives::{Header, TransactionSigned};
+use alloy_primitives::{Address, U256};
 use reth_revm::{
-    primitives::{BlobExcessGasAndPrice, BlockEnv, CfgEnv},
+    primitives::{
+        AnalysisKind, BlobExcessGasAndPrice, BlockEnv, CfgEnv, CfgEnvWithHandlerCfg,
+        Env, HandlerCfg, PrecompileSpecId, TxEnv,
+    },
     Database, Evm, EvmBuilder,
 };
 use std::sync::Arc;
@@ -75,26 +74,9 @@ impl ConfigureEvm for EvolveEvmConfig {
     type DefaultExternalContext<'a> = ();
 
     fn evm<DB: Database>(&self, db: DB) -> Evm<'_, (), DB> {
-        // Create the base EVM builder
-        let mut builder = EvmBuilder::default().with_db(db);
-
-        // Configure with Evolve-specific precompiles
-        builder = builder.append_handler_register(|handler| {
-            // Get the default Ethereum precompiles for the current spec
-            let spec_id = handler.cfg.spec_id;
-            let mut precompiles = revm::precompile::Precompiles::new(PrecompileSpecId::from_spec_id(spec_id));
-
-            // Add the ANDE Token Duality precompile
-            precompiles.extend([(
-                ANDE_PRECOMPILE_ADDRESS,
-                precompile::ande_token_duality_precompile(),
-            )]);
-
-            // Set the precompiles in the handler
-            handler.pre_execution.load_precompiles = Arc::new(move || precompiles.clone());
-        });
-
-        builder.build()
+        // For now, delegate to the Ethereum EVM config
+        // TODO: Add custom precompile registration
+        self.eth_config.evm(db)
     }
 
     fn evm_with_inspector<DB: Database, I>(
@@ -102,26 +84,9 @@ impl ConfigureEvm for EvolveEvmConfig {
         db: DB,
         inspector: I,
     ) -> Evm<'_, I, DB> {
-        // Create the base EVM builder with inspector
-        let mut builder = EvmBuilder::default().with_db(db).with_external_context(inspector);
-
-        // Configure with Evolve-specific precompiles
-        builder = builder.append_handler_register(|handler| {
-            // Get the default Ethereum precompiles for the current spec
-            let spec_id = handler.cfg.spec_id;
-            let mut precompiles = revm::precompile::Precompiles::new(PrecompileSpecId::from_spec_id(spec_id));
-
-            // Add the ANDE Token Duality precompile
-            precompiles.extend([(
-                ANDE_PRECOMPILE_ADDRESS,
-                precompile::ande_token_duality_precompile(),
-            )]);
-
-            // Set the precompiles in the handler
-            handler.pre_execution.load_precompiles = Arc::new(move || precompiles.clone());
-        });
-
-        builder.build()
+        // For now, delegate to the Ethereum EVM config
+        // TODO: Add custom precompile registration with inspector
+        self.eth_config.evm_with_inspector(db, inspector)
     }
 }
 
