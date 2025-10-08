@@ -8,8 +8,10 @@
 //!
 //! **Address:** 0x00000000000000000000000000000000000000fd
 
-use alloy_primitives::{Address, U256};
-use reth_revm::primitives::{Bytes, Precompile, PrecompileError, PrecompileResult, PrecompileWithAddress};
+use alloy_primitives::{Address, Bytes, U256};
+use revm_precompile::{
+    Precompile, PrecompileError, PrecompileId, PrecompileOutput, PrecompileResult,
+};
 use std::fmt;
 
 /// ANDE Token Duality Precompile Address: 0x00..fd
@@ -40,8 +42,11 @@ pub enum AndePrecompileError {
     TransferToZeroAddress,
     /// Insufficient balance for transfer
     InsufficientBalance {
+        /// Account with insufficient balance
         account: Address,
+        /// Required amount
         required: U256,
+        /// Available balance
         available: U256,
     },
 }
@@ -77,7 +82,11 @@ impl std::error::Error for AndePrecompileError {}
 
 /// Creates the ANDE Token Duality precompile
 pub fn ande_token_duality_precompile() -> Precompile {
-    Precompile::Standard(ande_token_duality_run)
+    Precompile::new(
+        PrecompileId::custom("ANDE"),
+        ANDE_PRECOMPILE_ADDRESS,
+        ande_token_duality_run,
+    )
 }
 
 /// Main execution function for the ANDE Token Duality precompile
@@ -88,14 +97,13 @@ pub fn ande_token_duality_precompile() -> Precompile {
 /// - Bytes 64-95: `value` amount (32 bytes, uint256)
 ///
 /// # Returns
-/// - Gas used
-/// - Output bytes (0x01 for success)
+/// - PrecompileOutput with gas used and output bytes
 ///
 /// # Security
 /// - Only callable by ANDEToken contract
 /// - Validates sufficient balance
 /// - Prevents transfer to address(0)
-fn ande_token_duality_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn ande_token_duality_run(input: &[u8], gas_limit: u64) -> PrecompileResult {
     // Calculate gas cost
     let input_len = input.len() as u64;
     let words = (input_len + 31) / 32;
@@ -122,7 +130,7 @@ fn ande_token_duality_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     // Decode parameters from input
     // Input format: abi.encode(from, to, value)
     // Each parameter is 32 bytes (left-padded for addresses)
-    let from = Address::from_slice(&input[12..32]); // Last 20 bytes of first word
+    let _from = Address::from_slice(&input[12..32]); // Last 20 bytes of first word
     let to = Address::from_slice(&input[44..64]); // Last 20 bytes of second word
     let value = U256::from_be_slice(&input[64..96]); // Third word
 
@@ -135,7 +143,7 @@ fn ande_token_duality_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
 
     // Gas saving optimization: return early for zero transfers
     if value.is_zero() {
-        return Ok((gas_cost, Bytes::from(vec![0x01])));
+        return Ok(PrecompileOutput::new(gas_cost, Bytes::from(vec![0x01])));
     }
 
     // NOTE: Balance validation and transfer execution are currently stubbed out
@@ -156,13 +164,11 @@ fn ande_token_duality_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     // This will require restructuring the precompile to work with the EVM database
 
     // Return success
-    Ok((gas_cost, Bytes::from(vec![0x01])))
+    Ok(PrecompileOutput::new(gas_cost, Bytes::from(vec![0x01])))
 }
 
-/// Returns the ANDE precompile with its address
-pub fn ande_precompile_with_address() -> PrecompileWithAddress {
-    PrecompileWithAddress(ANDE_PRECOMPILE_ADDRESS, ande_token_duality_precompile())
-}
+// NOTE: This function will be used for runtime injection in the payload builder
+// The precompile will be added to the EVM's handler.pre_execution.load_precompiles hook
 
 #[cfg(test)]
 mod tests {
@@ -181,7 +187,7 @@ mod tests {
 
     #[test]
     fn test_invalid_input_length() {
-        let input = Bytes::from(vec![0u8; 32]); // Only 32 bytes instead of 96
+        let input = vec![0u8; 32]; // Only 32 bytes instead of 96
         let result = ande_token_duality_run(&input, 10000);
         assert!(result.is_err());
     }
@@ -199,13 +205,13 @@ mod tests {
 
         // value = 0 (third 32 bytes are already 0)
 
-        let input = Bytes::from(input);
         let result = ande_token_duality_run(&input, 10000);
 
         assert!(result.is_ok());
-        let (gas, output) = result.unwrap();
-        assert!(gas > 0);
-        assert_eq!(output, Bytes::from(vec![0x01]));
+        let output = result.unwrap();
+        assert!(output.gas_used > 0);
+        assert_eq!(output.bytes, Bytes::from(vec![0x01]));
+        assert!(!output.reverted);
     }
 
     #[test]
@@ -221,7 +227,6 @@ mod tests {
         // value = 100
         input[95] = 100;
 
-        let input = Bytes::from(input);
         let result = ande_token_duality_run(&input, 10000);
 
         assert!(result.is_err());
@@ -242,13 +247,13 @@ mod tests {
         input[94] = 0x03;
         input[95] = 0xE8;
 
-        let input = Bytes::from(input);
         let result = ande_token_duality_run(&input, 10000);
 
         assert!(result.is_ok());
-        let (gas, output) = result.unwrap();
-        assert!(gas > ANDE_PRECOMPILE_BASE_GAS);
-        assert_eq!(output, Bytes::from(vec![0x01]));
+        let output = result.unwrap();
+        assert!(output.gas_used > ANDE_PRECOMPILE_BASE_GAS);
+        assert_eq!(output.bytes, Bytes::from(vec![0x01]));
+        assert!(!output.reverted);
     }
 
     #[test]
@@ -258,7 +263,6 @@ mod tests {
         input[44..64].copy_from_slice(&[0x02; 20]);
         input[95] = 100;
 
-        let input = Bytes::from(input);
         let result = ande_token_duality_run(&input, 100); // Insufficient gas
 
         assert!(matches!(result, Err(PrecompileError::OutOfGas)));

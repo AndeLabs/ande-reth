@@ -27,12 +27,22 @@ reth-evm.workspace = true
 reth-evm-ethereum.workspace = true
 reth-revm.workspace = true
 
+# revm precompile library
+revm-precompile = "27.0.0"
+
+# revm core for PrecompileProvider implementation
+revm = "29.0.0"
+revm-handler = "10.0.0"
+revm-context-interface = "10.1.0"
+revm-interpreter = "15.1.0"
+
 # Alloy dependencies
 alloy-rpc-types-engine.workspace = true
 alloy-primitives.workspace = true
 alloy-eips.workspace = true
 alloy-consensus.workspace = true
 alloy-rpc-types-txpool.workspace = true
+# alloy-evm = { version = "0.21.2", default-features = false, features = ["std"] }
 
 # Core dependencies
 serde = { workspace = true, features = ["derive"] }
@@ -42,6 +52,7 @@ jsonrpsee = { workspace = true, features = ["server", "macros"] }
 jsonrpsee-core.workspace = true
 jsonrpsee-proc-macros.workspace = true
 eyre.workspace = true
+tracing.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true

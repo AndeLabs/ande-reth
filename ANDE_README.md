@@ -3,6 +3,7 @@
 **Fork de:** [evstack/ev-reth](https://github.com/evstack/ev-reth)
 **Propósito:** Añadir precompile personalizado para Token Duality de ANDE
 **Proyecto relacionado:** [andechain](../andechain)
+**Estado Actual:** ✅ **Implementación Core Completa - Integración Pendiente (v0.2.0)**
 
 ---
 
@@ -48,7 +49,32 @@ andechain/                        # Repositorio principal (separado)
 
 ## 🔧 Modificaciones Realizadas
 
-### 1. Precompile ANDE Transfer (Pendiente)
+### 🎉 BREAKTHROUGH: Implementación Core Completa (v0.2.0)
+
+**El precompile ahora EJECUTA transferencias de balance nativo reales** usando `journal.transfer()` de revm v29.
+
+**✅ Lo que está implementado:**
+- ✅ Transferencias de balance nativo reales via `JournalTr::transfer()`
+- ✅ Validación de caller (solo ANDEToken en 0x00..fc puede llamar)
+- ✅ Parsing de input (96 bytes: from, to, value)
+- ✅ Cálculo de gas correcto
+- ✅ Manejo completo de errores (balance insuficiente, errores de DB)
+- ✅ Compila sin errores
+- ✅ Validado contra implementación de producción de Celo
+
+**⏳ Lo que falta (Integración):**
+- ⏳ Registrar precompile con EVM de reth (requiere custom EvmConfig)
+- ⏳ Tests unitarios para lógica del precompile
+- ⏳ Tests de integración end-to-end con ANDEToken.sol
+- ⏳ Build de imagen Docker v0.2.0
+
+**Descubrimiento clave:** `PrecompileProvider<CTX>` con trait bound `CTX: ContextTr<Journal: JournalTr>` permite acceso al journal para modificaciones de balance durante ejecución del EVM.
+
+**Ver:** `docs/V0.2.0_STATUS.md` para documentación completa del achievement.
+
+---
+
+### 1. Precompile ANDE Transfer (Stub - v0.1.0)
 
 **Archivo a modificar:** (TBD - necesita investigación de reth-revm)
 

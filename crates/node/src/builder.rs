@@ -6,6 +6,7 @@ use reth_evm::{
     ConfigureEvm, NextBlockEnvAttributes,
 };
 use reth_evm_ethereum::EthEvmConfig;
+use evolve_ev_reth::evm_config::AndeEvmConfig;
 use reth_payload_builder_primitives::PayloadBuilderError;
 use reth_primitives::{transaction::SignedTransaction, Header, SealedBlock, SealedHeader};
 use reth_provider::{HeaderProvider, StateProviderFactory};
@@ -18,8 +19,8 @@ use tracing::debug;
 pub struct EvolvePayloadBuilder<Client> {
     /// The client for state access
     pub client: Arc<Client>,
-    /// EVM configuration
-    pub evm_config: EthEvmConfig,
+    /// EVM configuration with ANDE precompiles
+    pub evm_config: AndeEvmConfig,
 }
 
 impl<Client> EvolvePayloadBuilder<Client>
@@ -27,7 +28,7 @@ where
     Client: StateProviderFactory + HeaderProvider<Header = Header> + Send + Sync + 'static,
 {
     /// Creates a new instance of `EvolvePayloadBuilder`
-    pub const fn new(client: Arc<Client>, evm_config: EthEvmConfig) -> Self {
+    pub const fn new(client: Arc<Client>, evm_config: AndeEvmConfig) -> Self {
         Self { client, evm_config }
     }
 
@@ -159,7 +160,7 @@ where
 /// Creates a new payload builder service
 pub const fn create_payload_builder_service<Client>(
     client: Arc<Client>,
-    evm_config: EthEvmConfig,
+    evm_config: AndeEvmConfig,
 ) -> Option<EvolvePayloadBuilder<Client>>
 where
     Client: StateProviderFactory + HeaderProvider<Header = Header> + Send + Sync + 'static,
