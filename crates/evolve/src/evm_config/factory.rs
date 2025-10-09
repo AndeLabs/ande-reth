@@ -30,11 +30,12 @@ pub const fn ande_precompile_address() -> Address {
 mod tests {
     use super::*;
     use reth_chainspec::{ChainSpecBuilder, MAINNET};
+    use reth_node_api::ConfigureEvm; // Importar el trait necesario
     use crate::evm_config::ANDE_PRECOMPILE_ADDRESS;
 
     #[test]
     fn test_ande_evm_config_creation() {
-        let chain_spec = Arc::new(ChainSpecBuilder::default().chain(MAINNET.clone()).build());
+        let chain_spec = Arc::new(ChainSpecBuilder::default().chain(MAINNET.chain).build());
         let config = create_ande_evm_config(chain_spec);
 
         // Test that we can create the config
@@ -48,7 +49,7 @@ mod tests {
 
     #[test]
     fn test_evm_config_compatibility() {
-        let chain_spec = Arc::new(ChainSpecBuilder::default().chain(MAINNET.clone()).build());
+        let chain_spec = Arc::new(ChainSpecBuilder::default().chain(MAINNET.chain).build());
         let config = create_ande_evm_config(chain_spec);
 
         // Test that we can access all EthEvmConfig functionality
@@ -56,6 +57,6 @@ mod tests {
         let _assembler = config.block_assembler();
 
         // These should not panic if everything works
-        assert!(!config.chain_spec().chain.name().is_empty());
+        assert!(!config.chain_spec().chain.named().is_empty());
     }
 }
