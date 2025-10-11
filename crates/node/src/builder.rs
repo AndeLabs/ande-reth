@@ -5,7 +5,7 @@ use reth_evm::{
     execute::{BlockBuilder, BlockBuilderOutcome},
     ConfigureEvm, NextBlockEnvAttributes,
 };
-use evolve_ev_reth::evm_config::AndeEvmConfig;
+use evolve_ev_reth::evm_config::{ande_token_duality_precompile, AndeEvmConfig, ANDE_PRECOMPILE_ADDRESS};
 use reth_payload_builder_primitives::PayloadBuilderError;
 use reth_primitives::{transaction::SignedTransaction, Header, SealedBlock, SealedHeader};
 use reth_provider::{HeaderProvider, StateProviderFactory};
@@ -36,6 +36,9 @@ where
         &self,
         attributes: EvolvePayloadAttributes,
     ) -> Result<SealedBlock, PayloadBuilderError> {
+        // Create a mutable clone of the EVM config to inject the precompile
+        let evm_config = self.evm_config.clone();
+
         // Validate attributes
         attributes
             .validate()
@@ -79,9 +82,8 @@ where
             withdrawals: Some(Default::default()),
         };
 
-        // Create block builder using the EVM config
-        let mut builder = self
-            .evm_config
+        // Create block builder using the MODIFIED EVM config
+        let mut builder = evm_config
             .builder_for_next_block(&mut state_db, &sealed_parent, next_block_attrs)
             .map_err(PayloadBuilderError::other)?;
 
