@@ -21,6 +21,9 @@ pub mod consensus;
 /// Custom EVM configuration with Evolve-specific precompiles.
 pub mod evm_config;
 
+/// Parallel EVM execution module.
+pub mod parallel;
+
 #[cfg(test)]
 mod tests;
 
