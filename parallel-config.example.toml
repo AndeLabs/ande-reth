@@ -1,0 +1,165 @@
+# AndeChain Parallel EVM Configuration
+#
+# This configuration controls the parallel execution of transactions in AndeChain,
+# enabling significant throughput improvements while maintaining ANDE Token Duality.
+
+[parallel_execution]
+
+# Number of worker threads for parallel execution
+# Recommended: 4-16 depending on available CPU cores
+# Higher values = more parallelism but higher memory usage
+concurrency_level = 8
+
+# Enable lazy updates for ANDE precompile and beneficiary
+# This optimization reduces transaction dependencies by deferring balance updates
+# RECOMMENDED: Keep enabled for ANDE Token Duality
+enable_lazy_updates = true
+
+# Maximum number of retries for failed transactions
+# Transactions that fail due to conflicts will be retried up to this many times
+max_retries = 3
+
+# Minimum number of transactions required to use parallel execution
+# Blocks with fewer transactions will use sequential execution to avoid overhead
+min_transactions_for_parallel = 4
+
+# Force fallback to sequential execution
+# Set to true to disable parallel execution completely (useful for debugging)
+force_sequential = false
+
+# Enable advanced dependency analysis
+# Phase 2 feature: More sophisticated dependency detection
+# Phase 1: Keep disabled for simplicity
+enable_advanced_dependency_analysis = false
+
+# Maximum number of dependent transactions per group
+# Limits the depth of dependency chains to prevent starvation
+max_dependency_depth = 10
+
+# Enable performance monitoring and metrics
+# Collects detailed performance data for parallel execution
+enable_monitoring = true
+
+[performance_profiles]
+
+# High throughput profile - maximize TPS
+[performance_profiles.high_throughput]
+concurrency_level = 16
+min_transactions_for_parallel = 2
+enable_advanced_dependency_analysis = true
+max_dependency_depth = 20
+
+# Low latency profile - minimize block time
+[performance_profiles.low_latency]
+concurrency_level = 4
+min_transactions_for_parallel = 3
+enable_advanced_dependency_analysis = false
+max_dependency_depth = 5
+
+# Testing profile - simplified for development
+[performance_profiles.testing]
+concurrency_level = 2
+enable_lazy_updates = false
+min_transactions_for_parallel = 2
+max_retries = 1
+enable_monitoring = false
+
+# Sequential only profile - disable parallel execution
+[performance_profiles.sequential_only]
+force_sequential = true
+enable_lazy_updates = false
+enable_monitoring = false
+
+[monitoring]
+
+# Metrics collection settings
+[monitoring.metrics]
+
+# Export Prometheus metrics
+enable_prometheus = true
+prometheus_port = 9091
+
+# Detailed transaction timing
+enable_detailed_timing = true
+
+# Track dependency resolution
+track_dependency_resolution = true
+
+# Memory usage monitoring
+track_memory_usage = true
+
+[ande_token_duality]
+
+# Special settings for ANDE Token Duality
+[ande_token_duality.precompile]
+
+# Enable lazy balance updates for ANDE transfers
+enable_lazy_balance_updates = true
+
+# Batch multiple ANDE transfers in single lazy operation
+batch_ande_transfers = true
+
+# Track ANDE-specific metrics
+track_ande_metrics = true
+
+[ande_token_duality.performance]
+
+# Optimize for ANDE token transfer patterns
+# Most transactions are ANDE transfers between users
+optimize_for_ande_transfers = true
+
+# Common recipient accounts (exchanges, faucets) that can be optimized
+common_recipients = [
+    "0x742d35Cc6634C0532925a3b8D4C9db96C4b4Db45",  # Example: Exchange
+    "0x8ba1f109551bD432803012645Hac136c",  # Example: Faucet
+    "0x1234567890123456789012345678901234567890",  # Add real addresses
+]
+
+[debugging]
+
+# Debug settings for parallel execution
+[debugging.execution]
+
+# Log individual transaction execution
+log_transaction_execution = false
+
+# Log dependency resolution
+log_dependency_resolution = false
+
+# Log scheduler decisions
+log_scheduler_decisions = false
+
+# Validate parallel results against sequential execution
+validate_parallel_results = true
+
+# Enable extensive debugging logs
+debug_mode = false
+
+# Performance profiling
+[debugging.profiling]
+
+# Enable execution time profiling
+enable_profiling = false
+
+# Profile file location
+profile_file = "/tmp/andechain-parallel-profile.json"
+
+# Profile sampling frequency (ms)
+sampling_frequency = 100
+
+[experimental]
+
+# Experimental features (use with caution)
+[experimental.features]
+
+# Enable speculative execution (Phase 2)
+enable_speculative_execution = false
+
+# Parallel block building (Phase 2)
+enable_parallel_block_building = false
+
+# Advanced conflict resolution (Phase 2)
+enable_advanced_conflict_resolution = false
+
+# WARNING: Experimental features may cause instability
+# Only enable in test environments

@@ -35,7 +35,12 @@ mod tests {
 
     #[test]
     fn test_ande_evm_config_creation() {
-        let chain_spec = Arc::new(ChainSpecBuilder::default().chain(MAINNET.chain).build());
+        let chain_spec = Arc::new(
+            ChainSpecBuilder::default()
+                .chain(MAINNET.chain)
+                .genesis(Default::default())
+                .build()
+        );
         let config = create_ande_evm_config(chain_spec);
 
         // Test that we can create the config
@@ -49,7 +54,12 @@ mod tests {
 
     #[test]
     fn test_evm_config_compatibility() {
-        let chain_spec = Arc::new(ChainSpecBuilder::default().chain(MAINNET.chain).build());
+        let chain_spec = Arc::new(
+            ChainSpecBuilder::default()
+                .chain(MAINNET.chain)
+                .genesis(Default::default())
+                .build()
+        );
         let config = create_ande_evm_config(chain_spec);
 
         // Test that we can access all EthEvmConfig functionality
@@ -57,6 +67,6 @@ mod tests {
         let _assembler = config.block_assembler();
 
         // These should not panic if everything works
-        assert!(!config.chain_spec().chain.named().is_empty());
+        assert!(config.chain_spec().chain.named().is_some());
     }
 }
