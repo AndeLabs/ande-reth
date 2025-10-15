@@ -43,9 +43,14 @@ jobs:
         with:
           cache-on-failure: true
       - uses: taiki-e/install-action@cross
-      - name: Log in to Docker
+      - name: Log in to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username ${DOCKER_USERNAME} --password-stdin
+      
+      - name: Log in to Docker Hub
+        if: ${{ secrets.DOCKERHUB_TOKEN && secrets.DOCKERHUB_USERNAME }}
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
       - name: Set up Docker builder
         run: |
           docker run --privileged --rm tonistiigi/binfmt --install arm64,amd64
@@ -62,3 +67,13 @@ jobs:
           export AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar
           export PKG_CONFIG_ALLOW_CROSS=1
           make docker-build-push
+      
+      - name: Push to Docker Hub
+        if: ${{ secrets.DOCKERHUB_TOKEN && secrets.DOCKERHUB_USERNAME }}
+        run: |
+          # Tag and push to Docker Hub as well
+          DOCKERHUB_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/ev-reth"
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:${{ env.GIT_TAG }} $DOCKERHUB_IMAGE:${{ env.GIT_TAG }}
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:${{ env.GIT_TAG }} $DOCKERHUB_IMAGE:latest
+          docker push $DOCKERHUB_IMAGE:${{ env.GIT_TAG }}
+          docker push $DOCKERHUB_IMAGE:latest

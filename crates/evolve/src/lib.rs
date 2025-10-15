@@ -24,6 +24,9 @@ pub mod evm_config;
 /// Parallel EVM execution module.
 pub mod parallel;
 
+/// MEV detection and integration module.
+pub mod mev;
+
 #[cfg(test)]
 mod tests;
 

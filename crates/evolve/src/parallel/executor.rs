@@ -45,32 +45,8 @@ pub trait HeaderProviderTrait: Send + Sync {
     fn header(&self, hash: &alloy_primitives::B256) -> Result<Option<Header>, ParallelPayloadError>;
 }
 
-/// Configuration for parallel execution
-#[derive(Debug, Clone)]
-pub struct ParallelConfig {
-    /// Number of worker threads for parallel execution
-    pub concurrency_level: NonZeroUsize,
-    /// Enable lazy updates for ANDE precompile and beneficiary
-    pub enable_lazy_updates: bool,
-    /// Maximum number of retries for failed transactions
-    pub max_retries: usize,
-    /// Minimum number of transactions required to use parallel execution
-    pub min_transactions_for_parallel: usize,
-    /// Force fallback to sequential execution
-    pub force_sequential: bool,
-}
-
-impl Default for ParallelConfig {
-    fn default() -> Self {
-        Self {
-            concurrency_level: NonZeroUsize::new(8).unwrap(),
-            enable_lazy_updates: true,
-            max_retries: 3,
-            min_transactions_for_parallel: 4,
-            force_sequential: false,
-        }
-    }
-}
+// Re-export ParallelConfig from config module
+pub use super::config::ParallelConfig;
 
 /// Transaction index type alias for clarity
 pub type TxIdx = usize;
@@ -264,7 +240,7 @@ impl MvMemory {
             }
 
             // Calculate final balance
-            let final_balance = lazy_state.base_balance
+            let _final_balance = lazy_state.base_balance
                 .saturating_add(total_additions)
                 .saturating_sub(total_subtractions);
 

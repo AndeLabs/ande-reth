@@ -6,6 +6,10 @@ members = [
   "crates/node",
   "crates/evolve",
   "crates/tests",
+  "benches",
+]
+exclude = [
+  "crates/evolve/fuzz",
 ]
 
 [workspace.package]
@@ -99,6 +103,7 @@ alloy-primitives = { version = "1.2.0", default-features = false }
 alloy-consensus = { version = "1.0.38", default-features = false }
 alloy-genesis = { version = "1.0.30", default-features = false }
 alloy-rpc-types-txpool = { version = "1.0.30", default-features = false }
+alloy-evm = { version = "0.20.1", default-features = false }
 
 # Core dependencies
 eyre = "0.6"
