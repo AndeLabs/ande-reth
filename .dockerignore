@@ -48,8 +48,7 @@ docker-compose*.yml
 .gitlab-ci.yml
 .travis.yml
 
-# Benchmarks and profiling
-benches/
+# Profiling artifacts (keep benchmarks source)
 perf.data
 perf.data.old
 flamegraph.svg

@@ -1,8 +1,13 @@
 
 import os
 import requests
-import google.generativeai as genai
 import sys
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    print("Error: google-generativeai not installed. Please install with: pip install google-generativeai")
+    sys.exit(1)
 
 # --- Constantes y Configuración ---
 
@@ -31,6 +36,10 @@ COMMENTS_URL = f'{PR_URL}/comments'
 
 def get_pr_diff():
     """Obtiene el diff del Pull Request desde la API de GitHub."""
+    if not PR_URL:
+        print("Error: PR_URL no está definido")
+        sys.exit(1)
+        
     try:
         response = requests.get(PR_URL, headers=GITHUB_HEADERS)
         response.raise_for_status() # Lanza una excepción para respuestas de error (4xx o 5xx)
@@ -81,13 +90,15 @@ def post_github_comment(comment):
         'Authorization': f'token {GITHUB_TOKEN}',
         'Accept': 'application/vnd.github.v3+json'
     }
+    response = None
     try:
         response = requests.post(COMMENTS_URL, json=payload, headers=headers)
         response.raise_for_status()
         print("Comentario de revisión publicado exitosamente en GitHub.")
     except requests.exceptions.RequestException as e:
         print(f"Error al publicar el comentario en GitHub: {e}")
-        print(f"Response body: {response.text}")
+        if response and hasattr(response, 'text'):
+            print(f"Response body: {response.text}")
         sys.exit(1)
 
 # --- Flujo de Ejecución ---

@@ -41,6 +41,7 @@ reth-rpc-api.workspace = true
 reth-rpc-engine-api.workspace = true
 reth-engine-primitives.workspace = true
 reth-ethereum-primitives.workspace = true
+reth-ethereum = { workspace = true, features = ["node-api", "node"] }
 
 # Alloy dependencies
 alloy-rpc-types.workspace = true
@@ -58,6 +59,9 @@ serde_json.workspace = true
 thiserror.workspace = true
 async-trait.workspace = true
 futures.workspace = true
+
+# revm for SpecId
+revm = "29.0.0"
 
 [dev-dependencies]
 # Test dependencies

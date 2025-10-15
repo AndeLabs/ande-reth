@@ -58,3 +58,12 @@ Thumbs.db
 
 # Docker build artifacts
 /dist/
+
+# ========================================
+# MARKDOWN DOCUMENTATION STRATEGY
+# ========================================
+# Ignore ALL markdown by default
+*.md
+
+# Un-ignore all README.md files in any directory
+!**/README.md

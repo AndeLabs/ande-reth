@@ -5,10 +5,10 @@ use reth_evm::{
     execute::{BlockBuilder, BlockBuilderOutcome},
     ConfigureEvm, NextBlockEnvAttributes,
 };
-use evolve_ev_reth::evm_config::{ande_token_duality_precompile, AndeEvmConfig, ANDE_PRECOMPILE_ADDRESS};
-use evolve_ev_reth::parallel::{ParallelExecutor, ParallelConfig};
+use evolve_ev_reth::evm_config::AndeEvmConfig;
+use evolve_ev_reth::parallel::{ParallelExecutor, ParallelConfig as EvolveParallelConfig};
 use reth_payload_builder_primitives::PayloadBuilderError;
-use reth_primitives::{transaction::SignedTransaction, Header, SealedBlock, SealedHeader};
+use reth_primitives::{TransactionSigned, Header, SealedBlock, SealedHeader, transaction::SignedTransaction};
 use reth_provider::{HeaderProvider, StateProviderFactory};
 use reth_revm::{database::StateProviderDatabase, State};
 use std::sync::Arc;
@@ -22,7 +22,7 @@ pub struct EvolvePayloadBuilder<Client> {
     /// EVM configuration with ANDE precompiles
     pub evm_config: AndeEvmConfig,
     /// Parallel execution configuration
-    pub parallel_config: Option<ParallelConfig>,
+    pub parallel_config: Option<EvolveParallelConfig>,
 }
 
 impl<Client> EvolvePayloadBuilder<Client>
@@ -42,7 +42,7 @@ where
     pub const fn new_with_parallel(
         client: Arc<Client>,
         evm_config: AndeEvmConfig,
-        parallel_config: Option<ParallelConfig>
+        parallel_config: Option<EvolveParallelConfig>
     ) -> Self {
         Self {
             client,
@@ -102,17 +102,7 @@ where
             withdrawals: Some(Default::default()),
         };
 
-        // Create block builder using the MODIFIED EVM config
-        let mut builder = evm_config
-            .builder_for_next_block(&mut state_db, &sealed_parent, next_block_attrs)
-            .map_err(PayloadBuilderError::other)?;
-
-        // Apply pre-execution changes
-        builder
-            .apply_pre_execution_changes()
-            .map_err(|err| PayloadBuilderError::Internal(err.into()))?;
-
-        // Decide execution mode: parallel vs sequential
+        // Decide execution mode: parallel vs sequential BEFORE creating builder
         let should_use_parallel = self.should_use_parallel_execution(&attributes.transactions);
 
         if should_use_parallel {
@@ -122,10 +112,8 @@ where
             );
             return self.build_payload_parallel(
                 attributes,
-                state_db,
                 sealed_parent,
                 next_block_attrs,
-                state_provider,
             ).await;
         } else {
             info!(
@@ -134,6 +122,15 @@ where
             );
         }
 
+        // Create block builder using the EVM config (for sequential execution)
+        let mut builder = evm_config
+            .builder_for_next_block(&mut state_db, &sealed_parent, next_block_attrs)
+            .map_err(PayloadBuilderError::other)?;
+
+        // Apply pre-execution changes
+        builder
+            .apply_pre_execution_changes()
+            .map_err(|err| PayloadBuilderError::Internal(err.into()))?;
         // Execute transactions sequentially
         tracing::info!(
             transaction_count = attributes.transactions.len(),
@@ -200,7 +197,7 @@ where
     }
 
     /// Decide whether to use parallel execution
-    fn should_use_parallel_execution(&self, transactions: &[SignedTransaction]) -> bool {
+    fn should_use_parallel_execution(&self, transactions: &[TransactionSigned]) -> bool {
         // If parallel execution is disabled, use sequential
         let parallel_config = match &self.parallel_config {
             Some(config) => config,
@@ -229,10 +226,8 @@ where
     async fn build_payload_parallel(
         &self,
         attributes: EvolvePayloadAttributes,
-        mut state_db: State<StateProviderDatabase<&impl StateProviderFactory>>,
         sealed_parent: SealedHeader,
         next_block_attrs: NextBlockEnvAttributes,
-        state_provider: impl StateProviderFactory,
     ) -> Result<SealedBlock, PayloadBuilderError> {
         let parallel_config = self.parallel_config.as_ref()
             .ok_or_else(|| PayloadBuilderError::Internal(RethError::Other(
@@ -247,27 +242,17 @@ where
         // Create parallel executor
         let parallel_executor = ParallelExecutor::new(parallel_config.clone());
 
-        // Convert transactions
-        let signed_transactions: Result<Vec<SignedTransaction>, _> = attributes
-            .transactions
-            .iter()
-            .map(|tx| tx.try_clone_into_recovered())
-            .collect();
-
-        let signed_transactions = signed_transactions.map_err(|_| {
-            PayloadBuilderError::Internal(RethError::Other(
-                "Failed to recover transactions for parallel execution".into()
-            ))
-        })?;
+        // Convert transactions - they're already TransactionSigned
+        let signed_transactions = attributes.transactions.clone();
 
         // Execute transactions in parallel
         let parallel_results = parallel_executor.execute_transactions(
             signed_transactions,
-            &mut state_db,
             &self.evm_config,
             &sealed_parent,
-            next_block_attrs,
-        ).await?;
+            next_block_attrs.clone(),
+        ).await
+        .map_err(|e| PayloadBuilderError::Internal(RethError::Other(format!("Parallel execution failed: {}", e).into())))?;
 
         info!(
             "✅ AndeChain: Parallel execution completed: {} transactions processed",
@@ -277,6 +262,14 @@ where
         // For now, we need to execute sequentially to build the actual block
         // TODO: Implement parallel block building
         warn!("⚠️  AndeChain: Falling back to sequential block building (Phase 1 limitation)");
+
+        // Recreate state_db for sequential block building
+        let state_provider = self.client.latest().map_err(PayloadBuilderError::other)?;
+        let db = StateProviderDatabase::new(&state_provider);
+        let mut state_db = State::builder()
+            .with_database(db)
+            .with_bundle_update()
+            .build();
 
         // Create block builder and execute transactions sequentially for block construction
         let mut builder = self.evm_config
@@ -288,7 +281,7 @@ where
             .map_err(|err| PayloadBuilderError::Internal(err.into()))?;
 
         // Execute transactions sequentially to build the block
-        let mut total_gas_used = 0u64;
+        let mut _total_gas_used = 0u64;
         for (i, tx) in attributes.transactions.iter().enumerate() {
             let recovered_tx = tx.try_clone_into_recovered().map_err(|_| {
                 PayloadBuilderError::Internal(RethError::Other(
@@ -298,7 +291,7 @@ where
 
             match builder.execute_transaction(recovered_tx) {
                 Ok(gas_used) => {
-                    total_gas_used += gas_used;
+                    _total_gas_used += gas_used;
                     debug!("Sequential execution for block building: tx {} gas_used {}", i, gas_used);
                 }
                 Err(err) => {
@@ -308,13 +301,14 @@ where
         }
 
         // Finish building the block
+        let final_state_provider = self.client.latest().map_err(PayloadBuilderError::other)?;
         let BlockBuilderOutcome {
             execution_result: _,
             hashed_state: _,
             trie_updates: _,
             block,
         } = builder
-            .finish(&state_provider)
+            .finish(&final_state_provider)
             .map_err(PayloadBuilderError::other)?;
 
         let sealed_block = block.sealed_block().clone();
@@ -341,7 +335,7 @@ where
 pub const fn create_payload_builder_service_with_parallel<Client>(
     client: Arc<Client>,
     evm_config: AndeEvmConfig,
-    parallel_config: Option<ParallelConfig>,
+    parallel_config: Option<EvolveParallelConfig>,
 ) -> Option<EvolvePayloadBuilder<Client>>
 where
     Client: StateProviderFactory + HeaderProvider<Header = Header> + Send + Sync + 'static,

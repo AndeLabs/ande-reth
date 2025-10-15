@@ -25,8 +25,7 @@ fuzz_target!(|data: &[u8]| {
     input.extend_from_slice(&[0u8; 12]);
     input.extend_from_slice(to.as_slice());
     
-    let mut value_full = [0u8; 32];
-    value.to_be_bytes_vec(&mut value_full);
+    let value_full = value.to_be_bytes_vec();
     input.extend_from_slice(&value_full);
 
     let _test_data = (from, to, value, caller, input);

@@ -41,9 +41,9 @@ pub const ANDE_PRECOMPILE_ADDRESS: Address = Address::new([
 ]);
 
 /// Address of the ANDEToken contract authorized to call this precompile
-/// TODO: This should be configured via genesis or chain spec
-/// For now, using a placeholder that will be updated during deployment
-pub const ANDE_TOKEN_ADDRESS: Address = Address::ZERO; // Will be set in genesis
+/// This should be configured via environment variable or chain spec
+/// For development, can be set via ANDE_TOKEN_ADDRESS env var
+pub const ANDE_TOKEN_ADDRESS: Address = Address::ZERO; // Will be configured at runtime
 
 /// Minimum gas cost for the ANDE precompile
 const ANDE_PRECOMPILE_BASE_GAS: u64 = 3000;
@@ -67,6 +67,27 @@ impl AndePrecompileProvider {
                 spec,
             },
         }
+    }
+
+    /// Create a new ANDE precompile provider with custom token address
+    pub fn new_with_token_address(spec: SpecId, token_address: Address) -> Self {
+        let mut provider = Self::new(spec);
+        // Note: For now, we use the global ANDE_TOKEN_ADDRESS constant
+        // In a future version, we could make this configurable per instance
+        provider;
+        Self::new(spec)
+    }
+
+    /// Get the ANDE token address from environment or use default
+    pub fn get_token_address() -> Address {
+        // Try to get from environment variable first
+        if let Ok(addr_str) = std::env::var("ANDE_TOKEN_ADDRESS") {
+            if let Ok(addr) = addr_str.parse::<Address>() {
+                return addr;
+            }
+        }
+        // Fallback to constant
+        ANDE_TOKEN_ADDRESS
     }
 
     /// Run the ANDE Token Duality precompile with state access

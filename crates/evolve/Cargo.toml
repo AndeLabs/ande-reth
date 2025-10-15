@@ -42,7 +42,8 @@ alloy-primitives.workspace = true
 alloy-eips.workspace = true
 alloy-consensus.workspace = true
 alloy-rpc-types-txpool.workspace = true
-# alloy-evm = { version = "0.21.2", default-features = false, features = ["std"] }
+alloy-evm.workspace = true
+alloy-genesis.workspace = true
 
 # Core dependencies
 serde = { workspace = true, features = ["derive"] }
@@ -53,6 +54,7 @@ jsonrpsee-core.workspace = true
 jsonrpsee-proc-macros.workspace = true
 eyre.workspace = true
 tracing.workspace = true
+tokio = { workspace = true, features = ["sync", "time", "rt"] }
 
 [dev-dependencies]
 serde_json.workspace = true

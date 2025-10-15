@@ -33,20 +33,21 @@ COPY crates/tests/Cargo.toml crates/tests/
 ARG BUILD_PROFILE=docker
 ENV BUILD_PROFILE=$BUILD_PROFILE
 
-# Set memory-efficient build flags
-ARG RUSTFLAGS="-C codegen-units=1"
+# Set memory-efficient build flags with jemalloc support
+ARG RUSTFLAGS="-C codegen-units=1 -C target-cpu=generic"
 ENV RUSTFLAGS="$RUSTFLAGS"
 ENV CARGO_BUILD_JOBS=2
 ENV CARGO_INCREMENTAL=0
+ENV JEMALLOC_SYS_WITH_LG_PAGE=16
 
 # Cook dependencies first (better layer caching)
-RUN cargo chef cook --profile $BUILD_PROFILE --recipe-path recipe.json --manifest-path bin/ev-reth/Cargo.toml
+RUN cargo chef cook --profile $BUILD_PROFILE --recipe-path recipe.json --manifest-path bin/ev-reth/Cargo.toml --features jemalloc
 
 # Copy all source code
 COPY . .
 
-# Build the binary with memory-efficient settings
-RUN cargo build --profile $BUILD_PROFILE --bin ev-reth --manifest-path bin/ev-reth/Cargo.toml -j 2
+# Build the binary with memory-efficient settings and jemalloc
+RUN cargo build --profile $BUILD_PROFILE --bin ev-reth --manifest-path bin/ev-reth/Cargo.toml -j 2 --features jemalloc
 
 # Copy binary from correct location
 RUN ls -la /app/target/$BUILD_PROFILE/ev-reth
