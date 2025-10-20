@@ -7,10 +7,10 @@
 use super::AndePrecompileProvider;
 use alloy_evm::{
     eth::EthEvmContext,
-    Evm, EvmFactory,
+    EvmEnv, EvmFactory,
 };
 use reth_ethereum::evm::{
-    primitives::{Database, EvmEnv},
+    primitives::Database,
     revm::{
         context::{Context, TxEnv},
         context_interface::result::{EVMError, HaltReason},
@@ -20,7 +20,7 @@ use reth_ethereum::evm::{
         MainBuilder, MainContext,
     },
 };
-use reth_ethereum::node::evm::EthEvm;
+use reth_evm::EthEvm;
 use std::sync::Arc;
 
 /// Custom EVM factory that injects ANDE precompiles
@@ -79,7 +79,7 @@ impl EvmFactory for AndeEvmFactory {
         input: EvmEnv,
         inspector: I,
     ) -> Self::Evm<DB, I> {
-        EthEvm::new(self.create_evm(db, input).into_inner().with_inspector(inspector), true)
+        EthEvm::new(self.create_evm(db, input).into_inner().with_inspector(inspector), false)
     }
 }
 

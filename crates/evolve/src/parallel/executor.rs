@@ -11,7 +11,7 @@ use reth_primitives::{TransactionSigned, Header, SealedHeader};
 use std::{
     sync::{Arc, Mutex},
     thread,
-    num::NonZeroUsize,
+
     collections::{HashMap, VecDeque},
     fmt::Debug,
 };
