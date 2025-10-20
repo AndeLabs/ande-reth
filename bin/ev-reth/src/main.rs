@@ -49,16 +49,17 @@ use crate::{
 #[global_allocator]
 static ALLOC: reth_cli_util::allocator::Allocator = reth_cli_util::allocator::new_allocator();
 
-/// Initialize reth OTLP tracing
-fn init_otlp_tracing() -> eyre::Result<()> {
-    // Set up tracing subscriber with reth OTLP layer
+/// Initialize simple stdout tracing (no file logging to avoid permission issues)
+fn init_stdout_tracing() -> eyre::Result<()> {
+    // Set up tracing subscriber with stdout only - no file logging
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
-        .with(tracing_subscriber::fmt::layer().with_target(false))
-        .with(reth_tracing_otlp::layer("ev-reth"))
+        .with(tracing_subscriber::fmt::layer()
+            .with_target(false)
+            .with_writer(std::io::stdout))
         .init();
 
-    info!("Reth OTLP tracing initialized for service: ev-reth");
+    info!("EV-RETH stdout tracing initialized (file logging disabled for Docker compatibility)");
     Ok(())
 }
 
@@ -158,15 +159,15 @@ fn main() {
 
     // Enable backtraces unless a RUST_BACKTRACE value has already been explicitly provided.
     if std::env::var_os("RUST_BACKTRACE").is_none() {
-        std::env::set_var("RUST_BACKTRACE", "1");
+        unsafe {
+            std::env::set_var("RUST_BACKTRACE", "1");
+        }
     }
 
-    // Initialize OTLP tracing
-    if std::env::var("OTEL_SDK_DISABLED").as_deref() == Ok("false") {
-        if let Err(e) = init_otlp_tracing() {
-            eprintln!("Failed to initialize OTLP tracing: {:?}", e);
-            eprintln!("Continuing without OTLP tracing...");
-        }
+    // Initialize stdout-only tracing (no OTLP, no file logging)
+    if let Err(e) = init_stdout_tracing() {
+        eprintln!("Failed to initialize stdout tracing: {:?}", e);
+        eprintln!("Continuing without tracing...");
     }
 
     if let Err(err) = Cli::<EthereumChainSpecParser, EvolveArgs>::parse().run(
