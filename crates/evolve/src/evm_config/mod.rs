@@ -9,7 +9,6 @@ pub mod factory;
 pub mod wrapper;
 pub mod injection;
 pub mod executor_factory;
-pub mod ande_evm_factory;
 
 #[cfg(test)]
 mod integration_test;
@@ -18,11 +17,10 @@ mod integration_test;
 mod e2e_test;
 
 pub use precompile::{
-    ande_token_duality_precompile, ANDE_PRECOMPILE_ADDRESS, ANDE_TOKEN_ADDRESS,
+    ande_token_duality_precompile, ANDE_PRECOMPILE_ADDRESS,
 };
 pub use ande_precompile_provider::AndePrecompileProvider;
-pub use wrapper::AndeEvmConfig;
+pub use wrapper::{AndeEvmConfig, AndeBlockBuilder};
 pub use factory::create_ande_evm_config;
 pub use injection::{create_ande_precompile_provider, ande_precompile_address};
 pub use executor_factory::AndeBlockExecutorFactory;
-pub use ande_evm_factory::AndeEvmFactory;

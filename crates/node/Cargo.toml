@@ -61,7 +61,7 @@ async-trait.workspace = true
 futures.workspace = true
 
 # revm for SpecId
-revm = "29.0.0"
+revm = "29.0.1"
 
 [dev-dependencies]
 # Test dependencies

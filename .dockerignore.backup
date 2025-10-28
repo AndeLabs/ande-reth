@@ -1,0 +1,91 @@
+# =============================================================================
+# OPTIMIZED .DOCKERIGNORE FOR EV-RETH BUILD
+# =============================================================================
+
+# Rust build artifacts (CRITICAL - reduces 30GB+ context)
+target/
+**/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Large development directories
+.git/
+.github/
+node_modules/
+**/node_modules/
+
+# IDE and editor files
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*~
+*.orig
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+logs/
+
+# Documentation (keep only essential)
+*.md
+!README.md
+!LICENSE-*
+!CHANGELOG.md
+docs/
+**/docs/
+
+# Development and test files
+.env*
+test-results/
+coverage/
+tarpaulin-report.html
+cobertura.xml
+**/.coverage
+**/htmlcov/
+
+# Temporary and cache files
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+**/.cache/
+
+# Docker files (avoid recursion)
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# CI/CD files
+.gitlab-ci.yml
+.travis.yml
+azure-pipelines.yml
+.circleci/
+
+# Profiling and debug artifacts
+perf.data*
+flamegraph.svg
+*.prof
+*.trace
+
+# Large binary files
+*.iso
+*.dmg
+*.zip
+*.tar.gz
+*.deb
+*.rpm
+
+# Benchmarks data (keep source, exclude results)
+benches/results/
+**/benchmark-results/
+
+# Test artifacts and fixtures
+**/fixtures/large-files/
+**/test-data/large/

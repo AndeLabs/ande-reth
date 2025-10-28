@@ -33,5 +33,5 @@ mod tests;
 // Re-export public types
 pub use config::{EvolveConfig, DEFAULT_MAX_TXPOOL_BYTES, DEFAULT_MAX_TXPOOL_GAS};
 pub use consensus::{EvolveConsensus, EvolveConsensusBuilder};
-pub use evm_config::{ande_token_duality_precompile, ANDE_PRECOMPILE_ADDRESS, ANDE_TOKEN_ADDRESS};
+pub use evm_config::{ande_token_duality_precompile, ANDE_PRECOMPILE_ADDRESS};
 pub use types::{EvolvePayloadAttributes, PayloadAttributesError};

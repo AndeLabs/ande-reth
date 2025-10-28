@@ -2,6 +2,7 @@ use alloy_primitives::U256;
 use clap::Parser;
 use ev_node::{EvolvePayloadBuilder, EvolvePayloadBuilderConfig};
 use evolve_ev_reth::EvolvePayloadAttributes;
+use evolve_ev_reth::evm_config::create_ande_evm_config;
 use reth_basic_payload_builder::{
     BuildArguments, BuildOutcome, HeaderForPayload, MissingPayloadBehaviour, PayloadBuilder,
     PayloadConfig,
@@ -94,11 +95,16 @@ where
         self,
         ctx: &BuilderContext<Node>,
         pool: Pool,
-        evm_config: EthEvmConfig,
+        _evm_config: EthEvmConfig,
     ) -> eyre::Result<Self::PayloadBuilder> {
+        // Create ANDE EVM config with Token Duality precompiles
+        let ande_evm_config = create_ande_evm_config(ctx.chain_spec().clone());
+        
+        tracing::info!("✅ ANDE Token Duality precompile enabled at 0x00...FD");
+        
         let evolve_builder = Arc::new(EvolvePayloadBuilder::new(
             Arc::new(ctx.provider().clone()),
-            evm_config,
+            ande_evm_config,
         ));
 
         Ok(EvolveEnginePayloadBuilder {

@@ -31,9 +31,9 @@ reth-revm.workspace = true
 revm-precompile = "27.0.0"
 
 # revm core for PrecompileProvider implementation
-revm = "29.0.0"
-revm-handler = "10.0.0"
-revm-context-interface = "10.1.0"
+revm = "29.0.1"
+revm-handler = "10.0.1"
+revm-context-interface = "10.2.0"
 revm-interpreter = "15.1.0"
 
 # Alloy dependencies
