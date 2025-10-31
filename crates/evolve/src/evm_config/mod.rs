@@ -20,7 +20,7 @@ pub use precompile::{
     ande_token_duality_precompile, ANDE_PRECOMPILE_ADDRESS,
 };
 pub use ande_precompile_provider::AndePrecompileProvider;
-pub use wrapper::{AndeEvmConfig, AndeBlockBuilder};
+pub use wrapper::AndeEvmConfig;
 pub use factory::create_ande_evm_config;
 pub use injection::{create_ande_precompile_provider, ande_precompile_address};
 pub use executor_factory::AndeBlockExecutorFactory;

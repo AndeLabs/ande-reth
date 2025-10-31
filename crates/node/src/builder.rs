@@ -13,6 +13,7 @@ use reth_provider::{HeaderProvider, StateProviderFactory};
 use reth_revm::{database::StateProviderDatabase, State};
 use std::sync::Arc;
 use tracing::{debug, info, warn};
+use crate::config::EvolvePayloadBuilderConfig;
 
 /// Payload builder for Evolve Reth node
 #[derive(Debug)]
@@ -23,6 +24,8 @@ pub struct EvolvePayloadBuilder<Client> {
     pub evm_config: AndeEvmConfig,
     /// Parallel execution configuration
     pub parallel_config: Option<EvolveParallelConfig>,
+    /// AndeChain genesis configuration
+    pub config: EvolvePayloadBuilderConfig,
 }
 
 impl<Client> EvolvePayloadBuilder<Client>
@@ -30,24 +33,70 @@ where
     Client: StateProviderFactory + HeaderProvider<Header = Header> + Send + Sync + 'static,
 {
     /// Creates a new instance of `EvolvePayloadBuilder`
-    pub const fn new(client: Arc<Client>, evm_config: AndeEvmConfig) -> Self {
+    pub fn new(
+        client: Arc<Client>,
+        evm_config: AndeEvmConfig,
+        config: EvolvePayloadBuilderConfig,
+    ) -> Self {
+        // Log AndeChain genesis configuration if present
+        if let Some(andechain) = &config.andechain {
+            if let Some(name) = &andechain.name {
+                info!(
+                    target: "andechain",
+                    name = %name,
+                    version = ?andechain.version,
+                    "AndeChain genesis configuration initialized"
+                );
+            }
+            if let Some(icaro) = &andechain.icaro {
+                info!(
+                    target: "andechain",
+                    icaro = %icaro,
+                    "K'intu sacred phrase loaded: {}", icaro
+                );
+            }
+            if !andechain.data.is_empty() {
+                info!(
+                    target: "andechain",
+                    data_count = andechain.data.len(),
+                    "AndeChain custom genesis data loaded with {} entries",
+                    andechain.data.len()
+                );
+            }
+        }
+
         Self {
             client,
             evm_config,
             parallel_config: None,
+            config,
         }
     }
 
     /// Creates a new instance with parallel configuration
-    pub const fn new_with_parallel(
+    pub fn new_with_parallel(
         client: Arc<Client>,
         evm_config: AndeEvmConfig,
-        parallel_config: Option<EvolveParallelConfig>
+        parallel_config: Option<EvolveParallelConfig>,
+        config: EvolvePayloadBuilderConfig,
     ) -> Self {
+        // Log AndeChain genesis configuration if present
+        if let Some(andechain) = &config.andechain {
+            if let Some(name) = &andechain.name {
+                info!(
+                    target: "andechain",
+                    name = %name,
+                    version = ?andechain.version,
+                    "AndeChain genesis configuration initialized with parallel execution"
+                );
+            }
+        }
+
         Self {
             client,
             evm_config,
             parallel_config,
+            config,
         }
     }
 
@@ -321,24 +370,26 @@ where
 }
 
 /// Creates a new payload builder service
-pub const fn create_payload_builder_service<Client>(
+pub fn create_payload_builder_service<Client>(
     client: Arc<Client>,
     evm_config: AndeEvmConfig,
+    config: EvolvePayloadBuilderConfig,
 ) -> Option<EvolvePayloadBuilder<Client>>
 where
     Client: StateProviderFactory + HeaderProvider<Header = Header> + Send + Sync + 'static,
 {
-    Some(EvolvePayloadBuilder::new(client, evm_config))
+    Some(EvolvePayloadBuilder::new(client, evm_config, config))
 }
 
 /// Creates a new payload builder service with parallel configuration
-pub const fn create_payload_builder_service_with_parallel<Client>(
+pub fn create_payload_builder_service_with_parallel<Client>(
     client: Arc<Client>,
     evm_config: AndeEvmConfig,
     parallel_config: Option<EvolveParallelConfig>,
+    config: EvolvePayloadBuilderConfig,
 ) -> Option<EvolvePayloadBuilder<Client>>
 where
     Client: StateProviderFactory + HeaderProvider<Header = Header> + Send + Sync + 'static,
 {
-    Some(EvolvePayloadBuilder::new_with_parallel(client, evm_config, parallel_config))
+    Some(EvolvePayloadBuilder::new_with_parallel(client, evm_config, parallel_config, config))
 }

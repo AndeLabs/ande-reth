@@ -99,12 +99,13 @@ where
     ) -> eyre::Result<Self::PayloadBuilder> {
         // Create ANDE EVM config with Token Duality precompiles
         let ande_evm_config = create_ande_evm_config(ctx.chain_spec().clone());
-        
+
         tracing::info!("✅ ANDE Token Duality precompile enabled at 0x00...FD");
-        
+
         let evolve_builder = Arc::new(EvolvePayloadBuilder::new(
             Arc::new(ctx.provider().clone()),
             ande_evm_config,
+            self.config.clone(),
         ));
 
         Ok(EvolveEnginePayloadBuilder {

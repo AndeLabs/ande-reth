@@ -93,24 +93,23 @@ impl PayloadValidator<crate::EvolveEngineTypes> for EvolveEngineValidator {
 impl EngineApiValidator<crate::EvolveEngineTypes> for EvolveEngineValidator {
     fn validate_version_specific_fields(
         &self,
-        version: EngineApiMessageVersion,
-        payload_or_attrs: PayloadOrAttributes<'_, ExecutionData, EvolveEnginePayloadAttributes>,
+        _version: EngineApiMessageVersion,
+        _payload_or_attrs: PayloadOrAttributes<'_, ExecutionData, EvolveEnginePayloadAttributes>,
     ) -> Result<(), EngineObjectValidationError> {
-        validate_version_specific_fields(self.chain_spec(), version, payload_or_attrs)
+        // ANDE Chain: Sovereign rollup - skip strict Ethereum fork validation
+        // We accept any Engine API version regardless of active forks
+        info!("Evolve validator: Skipping version validation for sovereign rollup");
+        Ok(())
     }
 
     fn ensure_well_formed_attributes(
         &self,
-        version: EngineApiMessageVersion,
+        _version: EngineApiMessageVersion,
         attributes: &EvolveEnginePayloadAttributes,
     ) -> Result<(), EngineObjectValidationError> {
-        validate_version_specific_fields(
-            self.chain_spec(),
-            version,
-            PayloadOrAttributes::<ExecutionData, EvolveEnginePayloadAttributes>::PayloadAttributes(
-                attributes,
-            ),
-        )?;
+        // ANDE Chain: Sovereign rollup - skip strict version-to-fork validation
+        // Only validate evolve-specific logic
+        info!("Evolve validator: Skipping version validation, checking evolve-specific attributes");
 
         // Validate evolve-specific attributes
         if let Some(ref transactions) = attributes.transactions {
