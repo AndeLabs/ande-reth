@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1
+# This Dockerfile is used for cross-platform builds
+
+FROM --platform=$TARGETPLATFORM ubuntu:24.04
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+# Map TARGETPLATFORM to the correct binary path from Makefile
+# linux/amd64 -> x86_64-unknown-linux-gnu
+# linux/arm64 -> aarch64-unknown-linux-gnu
+RUN case "$TARGETPLATFORM" in \
+    "linux/amd64") export ARCH_PATH="linux/amd64" ;; \
+    "linux/arm64") export ARCH_PATH="linux/arm64" ;; \
+    *) echo "Unsupported platform: $TARGETPLATFORM" && exit 1 ;; \
+esac
+
+# Copy the pre-built binary based on the target platform from Makefile structure
+COPY dist/bin/${ARCH_PATH}/ev-reth /usr/local/bin/ev-reth
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl jq ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Expose default ports: P2P, Discovery, Metrics, JSON-RPC, WebSocket, GraphQL, Engine API
+EXPOSE 30303 30303/udp 9001 8545 8546 7545 8551
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD /usr/local/bin/ev-reth --version || exit 1
+
+# Set the entrypoint
+ENTRYPOINT ["/usr/local/bin/ev-reth"]

@@ -1,0 +1,80 @@
+[package]
+name = "ev-reth"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+description = "Ev-reth node binary"
+
+[[bin]]
+name = "ev-reth"
+path = "src/main.rs"
+
+[dependencies]
+# Core evolve crates
+ev-node = { path = "../../crates/node" }
+ev-common = { path = "../../crates/common" }
+evolve-ev-reth = { path = "../../crates/evolve" }
+
+# Reth CLI and core dependencies
+reth-cli-util.workspace = true
+reth-ethereum-cli.workspace = true
+reth-ethereum = { workspace = true, features = ["node", "cli", "pool"] }
+reth-node-builder.workspace = true
+reth-node-api.workspace = true
+reth-chainspec.workspace = true
+reth-primitives-traits.workspace = true
+reth-engine-local.workspace = true
+reth-basic-payload-builder.workspace = true
+reth-ethereum-payload-builder.workspace = true
+reth-payload-builder.workspace = true
+reth-payload-primitives.workspace = true
+reth-revm.workspace = true
+reth-provider.workspace = true
+reth-trie-db.workspace = true
+reth-consensus.workspace = true
+reth-ethereum-primitives.workspace = true
+
+# Alloy dependencies
+alloy-network.workspace = true
+alloy-rpc-types.workspace = true
+alloy-primitives.workspace = true
+alloy-eips.workspace = true
+
+
+# Core dependencies
+eyre.workspace = true
+tracing.workspace = true
+tokio = { workspace = true, features = ["full"] }
+clap = { workspace = true, features = ["derive", "env"] }
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
+
+# Reth OTLP tracing
+reth-tracing-otlp.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+[lints]
+workspace = true
+
+[features]
+default = ["jemalloc"]
+
+jemalloc = ["reth-cli-util/jemalloc", "reth-ethereum-cli/jemalloc"]
+jemalloc-prof = ["reth-cli-util/jemalloc-prof"]
+tracy-allocator = ["reth-cli-util/tracy-allocator"]
+
+asm-keccak = ["reth-ethereum-cli/asm-keccak"]
+
+dev = ["reth-ethereum-cli/dev", "reth-ethereum/arbitrary"]
+
+min-error-logs = ["tracing/release_max_level_error"]
+min-warn-logs = ["tracing/release_max_level_warn"]
+min-info-logs = ["tracing/release_max_level_info"]
+min-debug-logs = ["tracing/release_max_level_debug"]
+min-trace-logs = ["tracing/release_max_level_trace"]
+
+[dev-dependencies]
+criterion = "0.7.0"

@@ -1,0 +1,23 @@
+[package]
+name = "ev-reth-benches"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "ev_reth_benches"
+path = "src/lib.rs"
+
+[dependencies]
+evolve-ev-reth = { path = "../crates/evolve" }
+criterion = { version = "0.7.0", features = ["html_reports"] }
+tokio = { version = "1.38", features = ["full"] }
+alloy-primitives = "1.2.0"
+alloy-evm = "0.21.2"
+revm = "29.0.1"
+revm-primitives = "20.2.1"
+
+[[bench]]
+name = "ande_precompile_bench"
+path = "ande_precompile_bench.rs"
+harness = false
