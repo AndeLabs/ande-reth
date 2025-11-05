@@ -5,6 +5,7 @@ members = [
   "crates/common",
   "crates/node",
   "crates/evolve",
+  "crates/consensus-bindings",
   "crates/tests",
   "benches",
 ]
