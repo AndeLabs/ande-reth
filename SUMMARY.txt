@@ -1,0 +1,67 @@
+╔══════════════════════════════════════════════════════════════╗
+║         ANDECHAIN GENESIS - HIDDEN IMPLEMENTATION            ║
+╚══════════════════════════════════════════════════════════════╝
+
+█ PHILOSOPHY: "Only those who seek shall find"
+
+  ❌ NO obvious metadata in genesis
+  ✅ Everything hidden in storage slots
+  ✅ Minimalist, mysterious design
+  ✅ Community must discover organically
+
+█ WHAT'S IN GENESIS:
+
+  Public view:
+  - Chain ID: 6174
+  - extraData: "0x536f6e6b276f20776163686179" (Sonk'o wachay)
+  
+  Hidden (address 0x...01):
+  - Slot 0: Invocation
+  - Slot 1: NCBI hint  
+  - Slots 2-7: 3 DNA hashes + refs (hex encoded)
+
+█ HOW TO DISCOVER:
+
+  1. Decode extraData → "Sonk'o wachay" (Heart awakens)
+  2. Read storage slot 1 → NCBI.nlm.nih.gov
+  3. Decode slots 2-7 → DNA hashes + NCBI accessions
+  4. Download from NCBI → Verify real genomic data
+  5. Understand → Sacred plants preservation system
+
+█ TECHNICAL:
+
+  Binary: target/release/ev-reth (62MB)
+  Genesis: specs/genesis.json (minimal)
+  Contract: contracts/PlantGenome.sol
+  Data: data/kintu/ (NCBI sources)
+  
+  Genesis Hash: 0x5be9254d38c4d20ec16dc7f2a2c53ab20efa4d3e9e7989b6da3ead91565ccbd2
+
+█ COMMANDS:
+
+  # Initialize
+  ./target/release/ev-reth init \
+    --chain specs/genesis.json \
+    --datadir ~/.andechain
+
+  # Run
+  ./target/release/ev-reth node \
+    --chain specs/genesis.json \
+    --datadir ~/.andechain
+
+  # Discover
+  cast storage 0x0000000000000000000000000000000000000001 0
+
+█ THE GAME:
+
+  This is NOT a game.
+  This is NOT CryptoKitties.
+  This is scientific preservation disguised as mystery.
+  
+  Real NCBI genomic data of sacred plants.
+  Hidden until someone cares enough to look.
+  Activated when community discovers it.
+
+╚══════════════════════════════════════════════════════════════╝
+                    "Sonk'o wachay" 🌱
+╚══════════════════════════════════════════════════════════════╝

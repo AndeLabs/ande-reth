@@ -28,7 +28,7 @@ sol! {
     #[sol(rpc)]
     #[derive(Debug, PartialEq, Eq)]
     AndeNativeStaking,
-    "../../../andechain/contracts/out/AndeNativeStaking.sol/AndeNativeStaking.json"
+    "../../../andechain/out/AndeNativeStaking.sol/AndeNativeStaking.json"
 }
 
 sol! {
@@ -36,7 +36,7 @@ sol! {
     #[sol(rpc)]
     #[derive(Debug, PartialEq, Eq)]
     AndeSequencerRegistry,
-    "../../../andechain/contracts/out/AndeSequencerRegistry.sol/AndeSequencerRegistry.json"
+    "../../../andechain/out/AndeSequencerRegistry.sol/AndeSequencerRegistry.json"
 }
 
 // Re-export main contract types

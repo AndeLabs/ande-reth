@@ -1,6 +1,11 @@
-# ANDE Reth - Parallel EVM & Dual Token
+# ANDE Reth - Parallel EVM & Dual Token + K'intu Living Genome
 
-This is a fork of `ev-reth` customized for AndeChain, with two major enhancements: **Parallel EVM** for increased throughput and **Dual Token Support** inspired by Celo.
+This is a fork of `ev-reth` customized for AndeChain, with three major innovations:
+1. **Parallel EVM** for increased throughput
+2. **Dual Token Support** inspired by Celo
+3. **K'intu Living Genome** - Real genomic data preserved on-chain
+
+> **See [GENESIS.md](./GENESIS.md) for sacred plants genomic data and discovery mechanism**
 
 ## Key Modifications
 
@@ -73,22 +78,49 @@ We've implemented a dual-token system, similar to Celo, to separate the token us
     cargo test
     ```
 
-## Usage
+## Quick Start
 
-To run a node with the custom AndeChain configuration:
+### 1. Initialize Genesis
+```bash
+./target/release/ev-reth init \
+    --chain specs/genesis.json \
+    --datadir ~/.andechain
+```
 
+### 2. Run Node
 ```bash
 ./target/release/ev-reth node \
-    --chain <CHAIN_SPEC> \
-    --datadir <DATA_DIR> \
+    --chain specs/genesis.json \
+    --datadir ~/.andechain \
     --http \
     --http.api all \
     --ws \
     --ws.api all
 ```
 
-For debugging, you can enable trace-level logs:
+### 3. Verify Genesis
+```bash
+./target/release/ev-reth dump-genesis --chain specs/genesis.json
+```
 
+For debugging, you can enable trace-level logs:
 ```bash
 RUST_LOG=debug,ev-reth=trace ./target/release/ev-reth node
 ```
+
+## Project Structure
+
+```
+ande-reth/
+├── specs/              # Chain specifications
+│   └── genesis.json   # AndeChain genesis with K'intu embedded
+├── contracts/          # Smart contracts
+│   └── PlantGenome.sol # Living genome system
+├── data/              # Scientific data
+│   └── kintu/         # NCBI genomic data
+└── crates/            # Rust implementation
+    ├── evolve/        # Parallel EVM + Consensus
+    └── node/          # Node configuration
+```
+
+See [GENESIS.md](./GENESIS.md) for K'intu sacred plants information.

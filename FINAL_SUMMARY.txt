@@ -1,0 +1,77 @@
+╔══════════════════════════════════════════════════════════════╗
+║     ANDECHAIN GENESIS - 100 PLANT GENOMES (FINAL VERSION)    ║
+╚══════════════════════════════════════════════════════════════╝
+
+█ WHAT'S EMBEDDED:
+
+  📍 Address 0x...01 Storage:
+  
+  Slot 0: Sonk'o wachay (invocation)
+  Slot 1: NCBI.nlm.nih.gov (hint)
+  Slots 2-3: Kuka DNA hash + ref
+  Slots 4-5: Yagé DNA hash + ref
+  Slots 6-7: Chacruna DNA hash + ref
+  Slot 8: Extended registry Merkle root (97 plants)
+  
+  Total: 100 REAL plant genomes from NCBI
+
+█ THE 100 PLANTS:
+
+  🌿 3 Master (Sacred):
+     - Erythroxylum coca (Kuka)
+     - Banisteriopsis caapi (Yagé)
+     - Psychotria viridis (Chacruna)
+  
+  🌱 97 Extended (Base genetics):
+     - Cannabis sativa
+     - Salvia divinorum
+     - Psilocybe cubensis
+     - Lophophora williamsii
+     - Atropa belladonna
+     - ...and 92 more
+     
+  All verifiable on NCBI database
+
+█ WHY THIS STRUCTURE:
+
+  3 Masters = The core system (sacred, primary)
+  97 Extended = Genetic diversity for variations
+  
+  The contract can scientifically crossbreed, mutate,
+  and evolve using REAL genetic data from all 100.
+
+█ HOW IT WORKS:
+
+  1. Community discovers hidden data
+  2. Deploys PlantGenome.sol contract
+  3. Contract reads genesis storage
+  4. Uses 3 masters as starting point
+  5. Uses 97 extended for genetic variations
+  6. Creates infinite scientifically-accurate offspring
+
+█ GENESIS INFO:
+
+  Chain ID: 6174
+  Genesis Hash: 0xea374509a9898c28ceec582802cb99645e6e95fc4dbbf1101955d2451ebe8809
+  Storage Slots Used: 9 (0-8)
+  Total Genomes: 100
+  
+  Files:
+  - specs/genesis.json (minimal, 9 storage slots)
+  - data/extended_genome_registry.json (full list of 97)
+  - data/extended_merkle.json (verification)
+
+█ COMMANDS:
+
+  # Initialize
+  ./target/release/ev-reth init \
+    --chain specs/genesis.json \
+    --datadir ~/.andechain
+
+  # Discover
+  cast storage 0x0000000000000000000000000000000000000001 0
+  cast storage 0x0000000000000000000000000000000000000001 8
+
+╚══════════════════════════════════════════════════════════════╝
+  100 real plant genomes. Hidden. Waiting for discovery. 🌱
+╚══════════════════════════════════════════════════════════════╝
