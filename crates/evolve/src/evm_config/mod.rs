@@ -4,6 +4,8 @@
 //! injected into the EVM at runtime during block execution.
 
 pub mod precompile;
+pub mod precompile_config;
+pub mod precompile_inspector;
 pub mod ande_precompile_provider;
 pub mod factory;
 pub mod wrapper;
@@ -19,6 +21,8 @@ mod e2e_test;
 pub use precompile::{
     ande_token_duality_precompile, ANDE_PRECOMPILE_ADDRESS,
 };
+pub use precompile_config::AndePrecompileConfig;
+pub use precompile_inspector::AndePrecompileInspector;
 pub use ande_precompile_provider::AndePrecompileProvider;
 pub use wrapper::AndeEvmConfig;
 pub use factory::create_ande_evm_config;

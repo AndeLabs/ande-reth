@@ -4,7 +4,16 @@
 //! 1. Native gas token (for paying transaction fees)
 //! 2. ERC-20 standard token (for DeFi applications)
 //!
-//! **Security:** Only the ANDEToken contract can call this precompile.
+//! ## Security Features
+//!
+//! This precompile implements multiple layers of security:
+//! - **Allow-list validation**: Only authorized addresses can call the precompile
+//! - **Per-call caps**: Maximum transfer amount per transaction
+//! - **Per-block caps**: Maximum total transfers per block
+//! - **Inspector pattern**: Deep integration with EVM context for state validation
+//!
+//! For configuration, see [`AndePrecompileConfig`](super::precompile_config::AndePrecompileConfig)
+//! For runtime validation, see [`AndePrecompileInspector`](super::precompile_inspector::AndePrecompileInspector)
 //!
 //! **Address:** 0x00000000000000000000000000000000000000fd
 
@@ -113,11 +122,14 @@ fn ande_token_duality_run(input: &[u8], gas_limit: u64) -> PrecompileResult {
         return Err(PrecompileError::OutOfGas);
     }
 
-    // NOTE: Caller validation is disabled for now because we need access to the EVM context
-    // to get msg.sender. This will be properly implemented when we integrate with the
-    // EvmBuilder and have access to the full execution context.
+    // NOTE: Caller validation is now handled by AndePrecompileInspector
+    // The Inspector has full access to the EVM context and validates:
+    // - Caller authorization via allow-list
+    // - Per-call transfer caps
+    // - Per-block transfer caps
     //
-    // TODO: Implement proper caller validation in the handler registration phase
+    // This precompile function focuses on the core transfer logic,
+    // while the Inspector handles all security validations before this function is called.
 
     // Validate input length (must be exactly 96 bytes: 3 x 32-byte words)
     if input.len() != 96 {
